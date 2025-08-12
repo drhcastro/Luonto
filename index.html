@@ -3,298 +3,549 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revista de Jabones Luonto</title>
+    <title>Luonto - Catálogo de Jabones Orgánicos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Raleway:wght@400;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
+        /* Estilos para las fuentes y el cuerpo */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #F8F4E1;
+            background-color: #FDF5E6; /* Tono cálido pastel */
+            font-family: 'Raleway', sans-serif;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            padding: 2rem;
             overflow: hidden;
         }
-        .title-font {
-            font-family: 'Playfair Display', serif;
-        }
-        
-        /* Contenedor del Flipbook */
-        #flipbook-container {
-            position: relative;
-            width: 90vw;
-            height: 70vh;
-            max-width: 1000px;
-            max-height: 600px;
+
+        /* Contenedor principal del libro */
+        .book-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
         }
 
-        #flipbook {
+        .book {
+            width: 90vw;
+            height: 90vh;
+            max-width: 1200px;
+            max-height: 800px;
+            position: relative;
+            display: flex;
+            perspective: 2500px;
+            transition: width 0.7s ease-in-out; /* Animación de apertura */
+        }
+
+        /* Estado cerrado del libro */
+        .book.is-closed {
+            width: 45vw;
+            max-width: 600px;
+        }
+        .book.is-closed .book-left {
+            display: none;
+        }
+        .book.is-closed .book-right {
+            width: 100%;
+        }
+
+
+        /* Mitad izquierda estática del libro */
+        .book-left {
+            width: 50%;
+            height: 100%;
+            position: relative;
+            border-radius: 1rem 0 0 1rem;
+            box-shadow: -5px 5px 15px rgba(0,0,0,0.15), inset 8px 0 15px -5px rgba(0,0,0,0.2);
+            background-color: #fff;
+            z-index: 1;
+        }
+
+        /* Contenedor para las páginas que se voltean */
+        .book-right {
+            width: 50%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        /* Estilo base para cada página */
+        .page {
             width: 100%;
             height: 100%;
-            visibility: hidden; /* Ocultar hasta que esté inicializado */
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: left;
+            transform-style: preserve-3d;
+            transition: transform 1.2s cubic-bezier(0.65, 0, 0.35, 1);
+            border-radius: 0 1rem 1rem 0;
+            cursor: pointer;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.15);
+        }
+        
+        /* Caras de la página (frente y reverso) */
+        .face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            overflow: hidden;
+            background-color: #ffffff;
         }
 
-        #flipbook .page {
-            background-color: #ffffff;
+        .front {
+            border-radius: 0 1rem 1rem 0;
+        }
+
+        .back {
+            transform: rotateY(180deg);
+            border-radius: 1rem 0 0 1rem;
+        }
+
+        /* Lógica para voltear la página */
+        .flipped {
+            transform: rotateY(-180deg);
+        }
+        
+        /* Z-index para ordenar las páginas */
+        .page[data-page="1"] { z-index: 10; }
+        .page[data-page="2"] { z-index: 9; }
+        .page[data-page="3"] { z-index: 8; }
+        .page[data-page="4"] { z-index: 7; }
+        .page[data-page="5"] { z-index: 6; }
+        
+        /* Fuentes personalizadas */
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .font-raleway { font-family: 'Raleway', sans-serif; }
+        
+        /* Estilo para el fondo de las contra-páginas */
+        .back-cover-bg {
             background-size: cover;
             background-position: center;
-            box-shadow: 0 0 20px rgba(0,0,0,0.2);
-        }
-        
-        #flipbook .page-wrapper {
-            -webkit-perspective: 2000px;
-            -moz-perspective: 2000px;
-            -ms-perspective: 2000px;
-            -o-perspective: 2000px;
-            perspective: 2000px;
-        }
-
-        /* Sombra para dar profundidad al pasar la página */
-        #flipbook .shadow {
-            -webkit-transition: -webkit-box-shadow 0.5s;
-            -moz-transition: -moz-box-shadow 0.5s;
-            -o-transition: -o-box-shadow 0.5s;
-            -ms-transition: -ms-box-shadow 0.5s;
-            transition: box-shadow 0.5s;
-        }
-        
-        /* Estilos para el contenido de las páginas */
-        .cover-page {
-            background-color: #739072;
-            color: white;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            text-align: center;
         }
-        .product-image-page {
-            overflow: hidden;
+        
+        /* Estilo del logo en las contra-páginas */
+        .back-cover-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            color: white;
+            background-color: rgba(0,0,0,0.4);
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            letter-spacing: 0.2rem;
         }
-        .product-image-page img {
+        
+        /* Estilos para los botones de acción y navegación */
+        .nav-button {
+            background-color: rgba(90, 80, 70, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .nav-button:hover {
+            background-color: rgba(90, 80, 70, 1);
+            transform: scale(1.1);
+        }
+        .nav-button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        #prev-btn {
+            position: fixed;
+            top: 50%;
+            left: 2rem;
+            transform: translateY(-50%);
+            z-index: 200;
+        }
+        #next-btn {
+            position: fixed;
+            top: 50%;
+            right: 2rem;
+            transform: translateY(-50%);
+            z-index: 200;
+        }
+
+        #action-buttons {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: #aaa;
+            font-family: 'Raleway', sans-serif;
+        }
+        
+        /* Carrito de Compras Modal */
+        #cart-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-        }
-        .product-details-page {
-            padding: 2rem 2.5rem;
-            color: #4F6F52;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .back-cover-page {
-            background-color: #D2E3C8;
-            display: flex;
-            flex-direction: column;
+            background-color: rgba(0,0,0,0.5);
+            display: none; /* Se cambia a flex con JS */
             justify-content: center;
             align-items: center;
-            text-align: center;
+            z-index: 300;
         }
-
-        /* Botones de navegación */
-        .nav-button {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 1000;
-            background-color: rgba(255, 255, 255, 0.7);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
+        #cart {
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            padding: 1.5rem;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: background-color 0.3s;
+            flex-direction: column;
         }
-        .nav-button:hover {
-            background-color: rgba(255, 255, 255, 1);
-        }
-        #prev-page {
-            left: -50px;
-        }
-        #next-page {
-            right: -50px;
+        #cart-items {
+            flex-grow: 1;
+            overflow-y: auto;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            #flipbook-container {
-                width: 100vw;
-                height: 75vh;
-            }
-            .product-details-page {
-                padding: 1.5rem;
-            }
-            .nav-button {
-                bottom: 20px;
-                top: auto;
-                transform: none;
-            }
-            #prev-page {
-                left: 30%;
-                transform: translateX(-50%);
-            }
-            #next-page {
-                right: 30%;
-                transform: translateX(50%);
-            }
+        /* Nuevas sombras */
+        .product-header {
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
         }
+        .product-card-shadow {
+            transition: box-shadow 0.3s ease-in-out;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        .product-card-shadow:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+
     </style>
 </head>
 <body>
 
-    <div id="flipbook-container">
-        <!-- Botones de Navegación -->
-        <div id="prev-page" class="nav-button">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#4F6F52]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-        </div>
-        
-        <div id="flipbook">
-            <!-- Las páginas se generarán aquí con JavaScript -->
-        </div>
+    <div class="book-container">
+        <div class="book" id="book">
+            <!-- Mitad izquierda estática -->
+            <div class="book-left" id="book-left"></div>
+            <!-- Mitad derecha con páginas que se voltean -->
+            <div class="book-right">
+                <!-- Página 1: Portada / Índice -->
+                <div class="page" data-page="1" id="page1">
+                    <div class="face front flex flex-col items-center justify-center text-center p-8 bg-cover bg-center" style="background-image: url('https://placehold.co/600x800/A8D8B9/333333?text=Cover');">
+                        <div class="bg-white/70 p-8 rounded-lg shadow-lg">
+                            <h1 class="font-playfair text-6xl md:text-8xl text-gray-800">Luonto</h1>
+                            <p class="font-raleway text-xl md:text-2xl text-gray-600 mt-4">Jabones Orgánicos Artesanales</p>
+                        </div>
+                    </div>
+                    <div class="face back p-8 md:p-12">
+                        <h2 class="font-playfair text-4xl border-b-2 border-gray-200 pb-4 mb-8">Contenido</h2>
+                        <ul class="space-y-6 font-raleway text-lg">
+                            <li class="cursor-pointer hover:text-green-700 transition-colors duration-300" onclick="goToTurn(1)">
+                                <div class="flex justify-between"><span>Baby Organics</span><span>Pág. 3</span></div>
+                            </li>
+                            <li class="cursor-pointer hover:text-green-700 transition-colors duration-300" onclick="goToTurn(2)">
+                                <div class="flex justify-between"><span>Dermatológicos</span><span>Pág. 5</span></div>
+                            </li>
+                            <li class="cursor-pointer hover:text-green-700 transition-colors duration-300" onclick="goToTurn(3)">
+                                <div class="flex justify-between"><span>Terapéuticos</span><span>Pág. 7</span></div>
+                            </li>
+                            <li class="cursor-pointer hover:text-green-700 transition-colors duration-300" onclick="goToTurn(4)">
+                                <div class="flex justify-between"><span>Línea Rejuvenece</span><span>Pág. 9</span></div>
+                            </li>
+                        </ul>
+                        <span class="page-number">2</span>
+                    </div>
+                </div>
 
-        <div id="next-page" class="nav-button">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#4F6F52]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                <!-- Página 2: Baby Organics -->
+                <div class="page" data-page="2" id="page2">
+                    <div class="face front p-6 md:p-8 flex flex-col">
+                        <h3 class="font-playfair text-3xl text-green-800 product-header">Baby Organics</h3>
+                        <p class="font-raleway text-sm text-gray-600 mb-4">Libres de químicos y colorantes para tu bebé.</p>
+                        <div class="flex-grow flex flex-col md:flex-row gap-6 items-center product-card-shadow">
+                            <img src="https://placehold.co/250x250/F5E6CC/8B785C?text=Jabón+Bebé" alt="Jabón para bebé" class="rounded-lg shadow-md w-full md:w-1/2 object-cover">
+                            <div class="w-full md:w-1/2">
+                                <h4 class="font-playfair text-2xl">Jabón de Caléndula</h4>
+                                <p class="font-raleway my-2 text-gray-700">Suavidad y protección.</p>
+                                <p class="font-raleway text-sm my-2"><strong class="font-semibold">Ingredientes:</strong> Aceite de caléndula, manteca de karité.</p>
+                                <p class="font-playfair text-2xl my-3">150.00 MXN</p>
+                                <button class="bg-green-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-800 transition-colors w-full" onclick="addToCart('Jabón de Caléndula', 150)">Agregar al Carrito</button>
+                            </div>
+                        </div>
+                        <span class="page-number">3</span>
+                    </div>
+                    <div class="face back back-cover-bg" style="background-image: url('https://placehold.co/600x800/DDEFE0/FFFFFF?text=');">
+                        <div class="back-cover-logo">Luonto</div>
+                        <span class="page-number">4</span>
+                    </div>
+                </div>
+                
+                <!-- Página 3: Dermatológicos -->
+                <div class="page" data-page="3" id="page3">
+                    <div class="face front p-6 md:p-8 flex flex-col">
+                        <h3 class="font-playfair text-3xl text-blue-800 product-header">Dermatológicos</h3>
+                        <p class="font-raleway text-sm text-gray-600 mb-4">Restauran, protegen y alivian.</p>
+                        <div class="flex-grow flex flex-col md:flex-row gap-6 items-center product-card-shadow">
+                            <img src="https://placehold.co/250x250/D4E2F4/5C7B9B?text=Jabón+Piel" alt="Jabón dermatológico" class="rounded-lg shadow-md w-full md:w-1/2 object-cover">
+                            <div class="w-full md:w-1/2">
+                                <h4 class="font-playfair text-2xl">Jabón de Arcilla y Tea Tree</h4>
+                                <p class="font-raleway my-2 text-gray-700">Ideal para pieles grasas.</p>
+                                <p class="font-raleway text-sm my-2"><strong class="font-semibold">Ingredientes:</strong> Arcilla verde, aceite de árbol de té.</p>
+                                <p class="font-playfair text-2xl my-3">180.00 MXN</p>
+                                <button class="bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-800 transition-colors w-full" onclick="addToCart('Jabón de Arcilla', 180)">Agregar al Carrito</button>
+                            </div>
+                        </div>
+                        <span class="page-number">5</span>
+                    </div>
+                    <div class="face back back-cover-bg" style="background-image: url('https://placehold.co/600x800/C9D6DE/FFFFFF?text=');">
+                        <div class="back-cover-logo">Luonto</div>
+                        <span class="page-number">6</span>
+                    </div>
+                </div>
+                
+                <!-- Página 4: Terapéuticos -->
+                <div class="page" data-page="4" id="page4">
+                    <div class="face front p-6 md:p-8 flex flex-col">
+                        <h3 class="font-playfair text-3xl text-purple-800 product-header">Terapéuticos</h3>
+                        <p class="font-raleway text-sm text-gray-600 mb-4">Un baño de aromaterapia.</p>
+                        <div class="flex-grow flex flex-col md:flex-row gap-6 items-center product-card-shadow">
+                            <img src="https://placehold.co/250x250/E1D5E7/7B6D8D?text=Jabón+Relax" alt="Jabón terapéutico" class="rounded-lg shadow-md w-full md:w-1/2 object-cover">
+                            <div class="w-full md:w-1/2">
+                                <h4 class="font-playfair text-2xl">Jabón de Lavanda</h4>
+                                <p class="font-raleway my-2 text-gray-700">Relajación total para cuerpo y mente.</p>
+                                <p class="font-raleway text-sm my-2"><strong class="font-semibold">Ingredientes:</strong> Aceite de lavanda, manzanilla.</p>
+                                <p class="font-playfair text-2xl my-3">170.00 MXN</p>
+                                <button class="bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-purple-800 transition-colors w-full" onclick="addToCart('Jabón de Lavanda', 170)">Agregar al Carrito</button>
+                            </div>
+                        </div>
+                        <span class="page-number">7</span>
+                    </div>
+                    <div class="face back back-cover-bg" style="background-image: url('https://placehold.co/600x800/D8BFD8/FFFFFF?text=');">
+                        <div class="back-cover-logo">Luonto</div>
+                        <span class="page-number">8</span>
+                    </div>
+                </div>
+
+                <!-- Página 5: Línea Rejuvenece -->
+                <div class="page" data-page="5" id="page5">
+                    <div class="face front p-6 md:p-8 flex flex-col">
+                        <h3 class="font-playfair text-3xl text-red-800 product-header">Línea Rejuvenece</h3>
+                        <p class="font-raleway text-sm text-gray-600 mb-4">Restaura tu piel del daño.</p>
+                        <div class="flex-grow flex flex-col md:flex-row gap-6 items-center product-card-shadow">
+                            <img src="https://placehold.co/250x250/F8D7DA/9B5B62?text=Jabón+Anti-edad" alt="Jabón rejuvenecedor" class="rounded-lg shadow-md w-full md:w-1/2 object-cover">
+                            <div class="w-full md:w-1/2">
+                                <h4 class="font-playfair text-2xl">Jabón de Rosa Mosqueta</h4>
+                                <p class="font-raleway my-2 text-gray-700">Regeneración celular.</p>
+                                <p class="font-raleway text-sm my-2"><strong class="font-semibold">Ingredientes:</strong> Aceite de rosa mosqueta, vitamina E.</p>
+                                <p class="font-playfair text-2xl my-3">200.00 MXN</p>
+                                <button class="bg-red-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors w-full" onclick="addToCart('Jabón de Rosa Mosqueta', 200)">Agregar al Carrito</button>
+                            </div>
+                        </div>
+                        <span class="page-number">9</span>
+                    </div>
+                    <div class="face back p-8 md:p-12 flex flex-col justify-center items-center text-center">
+                        <h2 class="font-playfair text-4xl mb-6">Contacto y Redes</h2>
+                        <p class="font-raleway text-lg mb-2">contacto@luonto.com</p>
+                        <p class="font-raleway text-lg mb-6">+52 123 456 7890</p>
+                        <div class="flex gap-6 text-3xl">
+                            <a href="#" class="hover:text-green-700 transition-colors">Instagram</a>
+                            <a href="#" class="hover:text-green-700 transition-colors">Facebook</a>
+                        </div>
+                        <span class="page-number">10</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+    <!-- Controles de Navegación y Acción -->
+    <button id="prev-btn" class="nav-button">‹</button>
+    <button id="next-btn" class="nav-button">›</button>
+
+    <div id="action-buttons">
+        <button id="cart-btn" class="nav-button">🛒</button>
+    </div>
+
+    <!-- Carrito de Compras Modal -->
+    <div id="cart-modal" style="display: none;">
+        <div id="cart">
+            <div class="flex justify-between items-center border-b-2 border-gray-200 pb-2 mb-4">
+                <h2 class="font-playfair text-2xl">Carrito</h2>
+                <button id="close-cart-btn" class="font-bold text-2xl">&times;</button>
+            </div>
+            <div id="cart-items" class="space-y-4">
+                <p id="empty-cart-msg" class="text-gray-500 text-center mt-8">Tu carrito está vacío.</p>
+            </div>
+            <div class="border-t-2 border-gray-200 pt-4 mt-4">
+                <div class="flex justify-between font-bold text-lg">
+                    <span>Total:</span>
+                    <span id="cart-total">0.00 MXN</span>
+                </div>
+                <button class="bg-green-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-800 transition-colors w-full mt-4">Finalizar Compra</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
-        $(function() {
-            // --- DATOS DE LOS PRODUCTOS ---
-            const products = [
-                {
-                    id: 1,
-                    name: "Avena & Miel",
-                    description: "Un jabón suave y exfoliante, perfecto para calmar la piel sensible. La miel actúa como un humectante natural mientras que la avena limpia los poros.",
-                    ingredients: ["Aceite de Oliva", "Aceite de Coco", "Avena Coloidal", "Miel Pura de Abeja"],
-                    price: "$120.00 MXN",
-                    imageUrl: "https://placehold.co/800x800/DEB887/FFFFFF?text=Avena+%26+Miel"
-                },
-                {
-                    id: 2,
-                    name: "Lavanda Relajante",
-                    description: "Ideal para un baño nocturno. El aroma del aceite esencial de lavanda ayuda a relajar la mente y el cuerpo, preparando para un sueño reparador.",
-                    ingredients: ["Manteca de Karité", "Aceite de Oliva", "Aceite Esencial de Lavanda", "Flores de Lavanda"],
-                    price: "$135.00 MXN",
-                    imageUrl: "https://placehold.co/800x800/E6E6FA/333333?text=Lavanda"
-                },
-                {
-                    id: 3,
-                    name: "Carbón Activado",
-                    description: "Un jabón detoxificante que limpia profundamente la piel. El carbón activado es conocido por su capacidad para absorber impurezas y toxinas.",
-                    ingredients: ["Aceite de Coco", "Carbón Activado de Bambú", "Aceite de Árbol de Té"],
-                    price: "$140.00 MXN",
-                    imageUrl: "https://placehold.co/800x800/444444/FFFFFF?text=Carb%C3%B3n+A."
-                },
-                {
-                    id: 4,
-                    name: "Cítricos & Romero",
-                    description: "Una explosión de energía para empezar el día. La combinación de naranja y romero revitaliza la piel y despierta los sentidos con su aroma fresco y herbal.",
-                    ingredients: ["Aceite de Oliva", "Aceite de Naranja", "Aceite Esencial de Romero", "Cáscara de Naranja"],
-                    price: "$130.00 MXN",
-                    imageUrl: "https://placehold.co/800x800/FFD580/333333?text=C%C3%ADtricos"
+        document.addEventListener('DOMContentLoaded', () => {
+            const book = document.getElementById('book');
+            const pages = Array.from(document.querySelectorAll('.page'));
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const bookLeft = document.getElementById('book-left');
+
+            let currentTurn = 0; // Número de "giros" de página. 0 = libro cerrado.
+            const totalPages = pages.length;
+
+            function updateBookState() {
+                if (currentTurn === 0) {
+                    // ESTADO: LIBRO CERRADO
+                    book.classList.add('is-closed');
+                } else {
+                    // ESTADO: LIBRO ABIERTO
+                    book.classList.remove('is-closed');
                 }
-            ];
 
-            const flipbook = $('#flipbook');
+                // Gira las páginas que correspondan
+                pages.forEach((page, index) => {
+                    if (index < currentTurn) {
+                        page.classList.add('flipped');
+                        page.style.zIndex = index + 1;
+                    } else {
+                        page.classList.remove('flipped');
+                        page.style.zIndex = totalPages - index;
+                    }
+                });
 
-            // --- GENERACIÓN DE PÁGINAS ---
+                // Actualiza el contenido de la página izquierda cuando el libro está abierto
+                if (currentTurn > 0) {
+                    const leftPageContent = pages[currentTurn - 1].querySelector('.back').cloneNode(true);
+                    bookLeft.innerHTML = '';
+                    bookLeft.appendChild(leftPageContent);
+                }
 
-            // 1. Portada
-            flipbook.append(`
-                <div class="page cover-page">
-                    <div class="p-4">
-                        <h1 class="title-font text-6xl md:text-8xl">Luonto</h1>
-                        <p class="text-xl md:text-2xl mt-4 font-light">Jabones Artesanales</p>
-                        <p class="text-md md:text-lg mt-12 font-serif italic">Edición 2024</p>
-                    </div>
-                </div>
-            `);
+                // Habilita/deshabilita los botones de navegación
+                prevBtn.disabled = currentTurn === 0;
+                nextBtn.disabled = currentTurn >= totalPages;
+            }
 
-            // 2. Páginas de productos
-            products.forEach(product => {
-                const ingredientsList = product.ingredients.map(ing => `<li class="text-sm">${ing}</li>`).join('');
-                flipbook.append(`
-                    <div class="page product-image-page">
-                        <img src="${product.imageUrl}" alt="Imagen de ${product.name}">
-                    </div>
-                    <div class="page product-details-page">
-                        <h2 class="title-font text-3xl md:text-4xl mb-3">${product.name}</h2>
-                        <p class="text-gray-600 mb-4 text-base">${product.description}</p>
-                        <div class="mb-4">
-                            <h3 class="font-bold text-lg mb-2">Ingredientes Clave:</h3>
-                            <ul class="list-disc list-inside text-gray-600 space-y-1">${ingredientsList}</ul>
-                        </div>
-                        <p class="text-2xl font-bold self-end mt-auto">${product.price}</p>
-                    </div>
-                `);
-            });
+            window.goToTurn = (turnNumber) => {
+                if (turnNumber >= 0 && turnNumber <= totalPages) {
+                    currentTurn = turnNumber;
+                    updateBookState();
+                }
+            }
 
-            // 3. Contraportada
-            flipbook.append(`
-                <div class="page back-cover-page">
-                    <div class="p-4 text-[#4F6F52]">
-                        <h2 class="title-font text-4xl">Luonto</h2>
-                        <p class="mt-4">Hecho con ingredientes naturales.</p>
-                        <p class="mt-2">Cuidado para tu piel, amor por el planeta.</p>
-                        <p class="mt-8 text-sm">www.luonto.com</p>
-                    </div>
-                </div>
-            `);
-
-            // --- INICIALIZACIÓN DE TURN.JS ---
-            // **CORRECCIÓN**: Simplificada la inicialización para máxima compatibilidad.
-            // Se eliminaron las opciones complejas para asegurar que la librería base funcione primero.
-            const width = $("#flipbook-container").width();
-            const height = $("#flipbook-container").height();
-            
-            flipbook.turn({
-                width: width,
-                height: height,
-                elevation: 50,
-                gradients: true,
-                autoCenter: true
-            });
-            
-            // Hacer visible el libro una vez inicializado para evitar parpadeos
-            flipbook.css('visibility', 'visible');
-            
-            // Recalcular tamaño en cambio de ventana
-            $(window).on('resize', function() {
-                const width = $("#flipbook-container").width();
-                const height = $("#flipbook-container").height();
-                flipbook.turn('size', width, height);
-            }).trigger('resize');
-
-
-            // --- NAVEGACIÓN ---
-            $('#next-page').on('click', function(e) {
-                e.preventDefault();
-                flipbook.turn('next');
-            });
-
-            $('#prev-page').on('click', function(e) {
-                e.preventDefault();
-                flipbook.turn('previous');
-            });
-
-            // Navegación con teclas de flecha
-            $(document).on('keydown', function(e){
-                if (e.keyCode==37) { // Flecha izquierda
-                    flipbook.turn('previous');
-                } else if (e.keyCode==39) { // Flecha derecha
-                    flipbook.turn('next');
+            prevBtn.addEventListener('click', () => {
+                if (currentTurn > 0) {
+                    currentTurn--;
+                    updateBookState();
                 }
             });
+
+            nextBtn.addEventListener('click', () => {
+                if (currentTurn < totalPages) {
+                    currentTurn++;
+                    updateBookState();
+                }
+            });
+
+            // --- Lógica del Carrito de Compras ---
+            const cartModal = document.getElementById('cart-modal');
+            const cartBtn = document.getElementById('cart-btn');
+            const closeCartBtn = document.getElementById('close-cart-btn');
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartTotalEl = document.getElementById('cart-total');
+            const emptyCartMsg = document.getElementById('empty-cart-msg');
+            let cart = [];
+
+            window.addToCart = (name, price) => {
+                event.stopPropagation();
+                const existingItem = cart.find(item => item.name === name);
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cart.push({ name, price, quantity: 1 });
+                }
+                updateCart();
+            }
+            
+            function updateCart() {
+                cartItemsContainer.innerHTML = '';
+                let total = 0;
+
+                if (cart.length === 0) {
+                    cartItemsContainer.appendChild(emptyCartMsg);
+                } else {
+                    if (cartItemsContainer.contains(emptyCartMsg)) {
+                         emptyCartMsg.remove();
+                    }
+                    cart.forEach((item, index) => {
+                        total += item.price * item.quantity;
+                        const itemEl = document.createElement('div');
+                        itemEl.className = 'flex justify-between items-center text-sm';
+                        itemEl.innerHTML = `
+                            <div>
+                                <p class="font-semibold">${item.name}</p>
+                                <p class="text-gray-600">${item.price.toFixed(2)} x ${item.quantity}</p>
+                            </div>
+                            <button class="text-red-500 hover:text-red-700 font-bold" onclick="removeFromCart(${index})">X</button>
+                        `;
+                        cartItemsContainer.appendChild(itemEl);
+                    });
+                }
+
+                cartTotalEl.textContent = `${total.toFixed(2)} MXN`;
+            }
+
+            window.removeFromCart = (index) => {
+                event.stopPropagation();
+                cart.splice(index, 1);
+                updateCart();
+            }
+
+            cartBtn.addEventListener('click', () => cartModal.style.display = 'flex');
+            closeCartBtn.addEventListener('click', () => cartModal.style.display = 'none');
+            cartModal.addEventListener('click', (e) => {
+                if (e.target === cartModal) {
+                    cartModal.style.display = 'none';
+                }
+            });
+            
+            // Estado inicial del libro: cerrado
+            updateBookState();
         });
     </script>
 </body>
