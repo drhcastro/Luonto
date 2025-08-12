@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revista de Jabones Luonto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F4E1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        .title-font {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        /* Contenedor del Flipbook */
+        #flipbook-container {
+            position: relative;
+            width: 90vw;
+            height: 70vh;
+            max-width: 1000px;
+            max-height: 600px;
+        }
+
+        #flipbook {
+            width: 100%;
+            height: 100%;
+            visibility: hidden; /* Ocultar hasta que esté inicializado */
+        }
+
+        #flipbook .page {
+            background-color: #ffffff;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        }
+        
+        #flipbook .page-wrapper {
+            -webkit-perspective: 2000px;
+            -moz-perspective: 2000px;
+            -ms-perspective: 2000px;
+            -o-perspective: 2000px;
+            perspective: 2000px;
+        }
+
+        /* Sombra para dar profundidad al pasar la página */
+        #flipbook .shadow {
+            -webkit-transition: -webkit-box-shadow 0.5s;
+            -moz-transition: -moz-box-shadow 0.5s;
+            -o-transition: -o-box-shadow 0.5s;
+            -ms-transition: -ms-box-shadow 0.5s;
+            transition: box-shadow 0.5s;
+        }
+        
+        /* Estilos para el contenido de las páginas */
+        .cover-page {
+            background-color: #739072;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .product-image-page {
+            overflow: hidden;
+        }
+        .product-image-page img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .product-details-page {
+            padding: 2rem 2.5rem;
+            color: #4F6F52;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .back-cover-page {
+            background-color: #D2E3C8;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Botones de navegación */
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background-color 0.3s;
+        }
+        .nav-button:hover {
+            background-color: rgba(255, 255, 255, 1);
+        }
+        #prev-page {
+            left: -50px;
+        }
+        #next-page {
+            right: -50px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #flipbook-container {
+                width: 100vw;
+                height: 75vh;
+            }
+            .product-details-page {
+                padding: 1.5rem;
+            }
+            .nav-button {
+                bottom: 20px;
+                top: auto;
+                transform: none;
+            }
+            #prev-page {
+                left: 30%;
+                transform: translateX(-50%);
+            }
+            #next-page {
+                right: 30%;
+                transform: translateX(50%);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="flipbook-container">
+        <!-- Botones de Navegación -->
+        <div id="prev-page" class="nav-button">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#4F6F52]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        </div>
+        
+        <div id="flipbook">
+            <!-- Las páginas se generarán aquí con JavaScript -->
+        </div>
+
+        <div id="next-page" class="nav-button">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#4F6F52]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+
+    <script>
+        $(function() {
+            // --- DATOS DE LOS PRODUCTOS ---
+            const products = [
+                {
+                    id: 1,
+                    name: "Avena & Miel",
+                    description: "Un jabón suave y exfoliante, perfecto para calmar la piel sensible. La miel actúa como un humectante natural mientras que la avena limpia los poros.",
+                    ingredients: ["Aceite de Oliva", "Aceite de Coco", "Avena Coloidal", "Miel Pura de Abeja"],
+                    price: "$120.00 MXN",
+                    imageUrl: "https://placehold.co/800x800/DEB887/FFFFFF?text=Avena+%26+Miel"
+                },
+                {
+                    id: 2,
+                    name: "Lavanda Relajante",
+                    description: "Ideal para un baño nocturno. El aroma del aceite esencial de lavanda ayuda a relajar la mente y el cuerpo, preparando para un sueño reparador.",
+                    ingredients: ["Manteca de Karité", "Aceite de Oliva", "Aceite Esencial de Lavanda", "Flores de Lavanda"],
+                    price: "$135.00 MXN",
+                    imageUrl: "https://placehold.co/800x800/E6E6FA/333333?text=Lavanda"
+                },
+                {
+                    id: 3,
+                    name: "Carbón Activado",
+                    description: "Un jabón detoxificante que limpia profundamente la piel. El carbón activado es conocido por su capacidad para absorber impurezas y toxinas.",
+                    ingredients: ["Aceite de Coco", "Carbón Activado de Bambú", "Aceite de Árbol de Té"],
+                    price: "$140.00 MXN",
+                    imageUrl: "https://placehold.co/800x800/444444/FFFFFF?text=Carb%C3%B3n+A."
+                },
+                {
+                    id: 4,
+                    name: "Cítricos & Romero",
+                    description: "Una explosión de energía para empezar el día. La combinación de naranja y romero revitaliza la piel y despierta los sentidos con su aroma fresco y herbal.",
+                    ingredients: ["Aceite de Oliva", "Aceite de Naranja", "Aceite Esencial de Romero", "Cáscara de Naranja"],
+                    price: "$130.00 MXN",
+                    imageUrl: "https://placehold.co/800x800/FFD580/333333?text=C%C3%ADtricos"
+                }
+            ];
+
+            const flipbook = $('#flipbook');
+
+            // --- GENERACIÓN DE PÁGINAS ---
+
+            // 1. Portada
+            flipbook.append(`
+                <div class="page cover-page">
+                    <div class="p-4">
+                        <h1 class="title-font text-6xl md:text-8xl">Luonto</h1>
+                        <p class="text-xl md:text-2xl mt-4 font-light">Jabones Artesanales</p>
+                        <p class="text-md md:text-lg mt-12 font-serif italic">Edición 2024</p>
+                    </div>
+                </div>
+            `);
+
+            // 2. Páginas de productos
+            products.forEach(product => {
+                const ingredientsList = product.ingredients.map(ing => `<li class="text-sm">${ing}</li>`).join('');
+                flipbook.append(`
+                    <div class="page product-image-page">
+                        <img src="${product.imageUrl}" alt="Imagen de ${product.name}">
+                    </div>
+                    <div class="page product-details-page">
+                        <h2 class="title-font text-3xl md:text-4xl mb-3">${product.name}</h2>
+                        <p class="text-gray-600 mb-4 text-base">${product.description}</p>
+                        <div class="mb-4">
+                            <h3 class="font-bold text-lg mb-2">Ingredientes Clave:</h3>
+                            <ul class="list-disc list-inside text-gray-600 space-y-1">${ingredientsList}</ul>
+                        </div>
+                        <p class="text-2xl font-bold self-end mt-auto">${product.price}</p>
+                    </div>
+                `);
+            });
+
+            // 3. Contraportada
+            flipbook.append(`
+                <div class="page back-cover-page">
+                    <div class="p-4 text-[#4F6F52]">
+                        <h2 class="title-font text-4xl">Luonto</h2>
+                        <p class="mt-4">Hecho con ingredientes naturales.</p>
+                        <p class="mt-2">Cuidado para tu piel, amor por el planeta.</p>
+                        <p class="mt-8 text-sm">www.luonto.com</p>
+                    </div>
+                </div>
+            `);
+
+            // --- INICIALIZACIÓN DE TURN.JS ---
+            // **CORRECCIÓN**: Simplificada la inicialización para máxima compatibilidad.
+            // Se eliminaron las opciones complejas para asegurar que la librería base funcione primero.
+            const width = $("#flipbook-container").width();
+            const height = $("#flipbook-container").height();
+            
+            flipbook.turn({
+                width: width,
+                height: height,
+                elevation: 50,
+                gradients: true,
+                autoCenter: true
+            });
+            
+            // Hacer visible el libro una vez inicializado para evitar parpadeos
+            flipbook.css('visibility', 'visible');
+            
+            // Recalcular tamaño en cambio de ventana
+            $(window).on('resize', function() {
+                const width = $("#flipbook-container").width();
+                const height = $("#flipbook-container").height();
+                flipbook.turn('size', width, height);
+            }).trigger('resize');
+
+
+            // --- NAVEGACIÓN ---
+            $('#next-page').on('click', function(e) {
+                e.preventDefault();
+                flipbook.turn('next');
+            });
+
+            $('#prev-page').on('click', function(e) {
+                e.preventDefault();
+                flipbook.turn('previous');
+            });
+
+            // Navegación con teclas de flecha
+            $(document).on('keydown', function(e){
+                if (e.keyCode==37) { // Flecha izquierda
+                    flipbook.turn('previous');
+                } else if (e.keyCode==39) { // Flecha derecha
+                    flipbook.turn('next');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
