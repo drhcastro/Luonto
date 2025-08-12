@@ -39,27 +39,29 @@
             position: relative;
             display: flex;
             perspective: 2500px;
-            transition: width 0.7s ease-in-out; /* Animación de apertura */
+            transition: width 0.7s ease-in-out;
         }
 
         /* Estado cerrado del libro */
         .book.is-closed {
-            width: 45vw;
-            max-width: 600px;
+            width: 45vw; /* La mitad del ancho total */
+            max-width: 600px; /* La mitad del ancho máximo */
         }
         .book.is-closed .book-left {
             display: none;
         }
         .book.is-closed .book-right {
             width: 100%;
+            left: 0;
         }
-
 
         /* Mitad izquierda estática del libro */
         .book-left {
             width: 50%;
             height: 100%;
-            position: relative;
+            position: absolute;
+            left: 0;
+            top: 0;
             border-radius: 1rem 0 0 1rem;
             box-shadow: -5px 5px 15px rgba(0,0,0,0.15), inset 8px 0 15px -5px rgba(0,0,0,0.2);
             background-color: #fff;
@@ -70,8 +72,11 @@
         .book-right {
             width: 50%;
             height: 100%;
-            position: relative;
+            position: absolute;
+            left: 50%;
+            top: 0;
             transform-style: preserve-3d;
+            transition: left 0.7s ease-in-out, width 0.7s ease-in-out;
         }
 
         /* Estilo base para cada página */
@@ -120,6 +125,7 @@
         .page[data-page="3"] { z-index: 8; }
         .page[data-page="4"] { z-index: 7; }
         .page[data-page="5"] { z-index: 6; }
+        .page[data-page="6"] { z-index: 5; }
         
         /* Fuentes personalizadas */
         .font-playfair { font-family: 'Playfair Display', serif; }
@@ -260,7 +266,7 @@
             <div class="book-left" id="book-left"></div>
             <!-- Mitad derecha con páginas que se voltean -->
             <div class="book-right">
-                <!-- Página 1: Portada / Índice -->
+                <!-- Página 1: Portada / Página en blanco -->
                 <div class="page" data-page="1" id="page1">
                     <div class="face front flex flex-col items-center justify-center text-center p-8 bg-cover bg-center" style="background-image: url('https://placehold.co/600x800/A8D8B9/333333?text=Cover');">
                         <div class="bg-white/70 p-8 rounded-lg shadow-lg">
@@ -268,28 +274,39 @@
                             <p class="font-raleway text-xl md:text-2xl text-gray-600 mt-4">Jabones Orgánicos Artesanales</p>
                         </div>
                     </div>
-                    <div class="face back p-8 md:p-12">
-                        <h2 class="font-playfair text-4xl border-b-2 border-gray-200 pb-4 mb-8">Contenido</h2>
-                        <ul class="space-y-6 font-raleway text-lg">
-                            <li class="cursor-pointer hover:text-green-700 transition-colors duration-300" onclick="goToTurn(1)">
-                                <div class="flex justify-between"><span>Baby Organics</span><span>Pág. 3</span></div>
-                            </li>
-                            <li class="cursor-pointer hover:text-green-700 transition-colors duration-300" onclick="goToTurn(2)">
-                                <div class="flex justify-between"><span>Dermatológicos</span><span>Pág. 5</span></div>
-                            </li>
-                            <li class="cursor-pointer hover:text-green-700 transition-colors duration-300" onclick="goToTurn(3)">
-                                <div class="flex justify-between"><span>Terapéuticos</span><span>Pág. 7</span></div>
-                            </li>
-                            <li class="cursor-pointer hover:text-green-700 transition-colors duration-300" onclick="goToTurn(4)">
-                                <div class="flex justify-between"><span>Línea Rejuvenece</span><span>Pág. 9</span></div>
-                            </li>
-                        </ul>
+                    <div class="face back">
                         <span class="page-number">2</span>
                     </div>
                 </div>
 
-                <!-- Página 2: Baby Organics -->
+                <!-- Página 2: Contenido / Fondo -->
                 <div class="page" data-page="2" id="page2">
+                    <div class="face front p-8 md:p-12">
+                        <h2 class="font-playfair text-4xl border-b-2 border-gray-200 pb-4 mb-8">Contenido</h2>
+                        <ul class="space-y-6 font-raleway text-lg">
+                            <li class="cursor-pointer hover:text-green-700 transition-colors duration-300" onclick="navigateToTurn(2)">
+                                <div class="flex justify-between"><span>Baby Organics</span><span>Pág. 5</span></div>
+                            </li>
+                            <li class="cursor-pointer hover:text-green-700 transition-colors duration-300" onclick="navigateToTurn(3)">
+                                <div class="flex justify-between"><span>Dermatológicos</span><span>Pág. 7</span></div>
+                            </li>
+                            <li class="cursor-pointer hover:text-green-700 transition-colors duration-300" onclick="navigateToTurn(4)">
+                                <div class="flex justify-between"><span>Terapéuticos</span><span>Pág. 9</span></div>
+                            </li>
+                            <li class="cursor-pointer hover:text-green-700 transition-colors duration-300" onclick="navigateToTurn(5)">
+                                <div class="flex justify-between"><span>Línea Rejuvenece</span><span>Pág. 11</span></div>
+                            </li>
+                        </ul>
+                        <span class="page-number">3</span>
+                    </div>
+                    <div class="face back back-cover-bg" style="background-image: url('https://placehold.co/600x800/DDEFE0/FFFFFF?text=');">
+                        <div class="back-cover-logo">Luonto</div>
+                        <span class="page-number">4</span>
+                    </div>
+                </div>
+                
+                <!-- Página 3: Baby Organics -->
+                <div class="page" data-page="3" id="page3">
                     <div class="face front p-6 md:p-8 flex flex-col">
                         <h3 class="font-playfair text-3xl text-green-800 product-header">Baby Organics</h3>
                         <p class="font-raleway text-sm text-gray-600 mb-4">Libres de químicos y colorantes para tu bebé.</p>
@@ -303,16 +320,16 @@
                                 <button class="bg-green-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-800 transition-colors w-full" onclick="addToCart('Jabón de Caléndula', 150)">Agregar al Carrito</button>
                             </div>
                         </div>
-                        <span class="page-number">3</span>
+                        <span class="page-number">5</span>
                     </div>
                     <div class="face back back-cover-bg" style="background-image: url('https://placehold.co/600x800/DDEFE0/FFFFFF?text=');">
                         <div class="back-cover-logo">Luonto</div>
-                        <span class="page-number">4</span>
+                        <span class="page-number">6</span>
                     </div>
                 </div>
                 
-                <!-- Página 3: Dermatológicos -->
-                <div class="page" data-page="3" id="page3">
+                <!-- Página 4: Dermatológicos -->
+                <div class="page" data-page="4" id="page4">
                     <div class="face front p-6 md:p-8 flex flex-col">
                         <h3 class="font-playfair text-3xl text-blue-800 product-header">Dermatológicos</h3>
                         <p class="font-raleway text-sm text-gray-600 mb-4">Restauran, protegen y alivian.</p>
@@ -326,16 +343,16 @@
                                 <button class="bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-800 transition-colors w-full" onclick="addToCart('Jabón de Arcilla', 180)">Agregar al Carrito</button>
                             </div>
                         </div>
-                        <span class="page-number">5</span>
+                        <span class="page-number">7</span>
                     </div>
                     <div class="face back back-cover-bg" style="background-image: url('https://placehold.co/600x800/C9D6DE/FFFFFF?text=');">
                         <div class="back-cover-logo">Luonto</div>
-                        <span class="page-number">6</span>
+                        <span class="page-number">8</span>
                     </div>
                 </div>
                 
-                <!-- Página 4: Terapéuticos -->
-                <div class="page" data-page="4" id="page4">
+                <!-- Página 5: Terapéuticos -->
+                <div class="page" data-page="5" id="page5">
                     <div class="face front p-6 md:p-8 flex flex-col">
                         <h3 class="font-playfair text-3xl text-purple-800 product-header">Terapéuticos</h3>
                         <p class="font-raleway text-sm text-gray-600 mb-4">Un baño de aromaterapia.</p>
@@ -349,16 +366,16 @@
                                 <button class="bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-purple-800 transition-colors w-full" onclick="addToCart('Jabón de Lavanda', 170)">Agregar al Carrito</button>
                             </div>
                         </div>
-                        <span class="page-number">7</span>
+                        <span class="page-number">9</span>
                     </div>
                     <div class="face back back-cover-bg" style="background-image: url('https://placehold.co/600x800/D8BFD8/FFFFFF?text=');">
                         <div class="back-cover-logo">Luonto</div>
-                        <span class="page-number">8</span>
+                        <span class="page-number">10</span>
                     </div>
                 </div>
 
-                <!-- Página 5: Línea Rejuvenece -->
-                <div class="page" data-page="5" id="page5">
+                <!-- Página 6: Línea Rejuvenece -->
+                <div class="page" data-page="6" id="page6">
                     <div class="face front p-6 md:p-8 flex flex-col">
                         <h3 class="font-playfair text-3xl text-red-800 product-header">Línea Rejuvenece</h3>
                         <p class="font-raleway text-sm text-gray-600 mb-4">Restaura tu piel del daño.</p>
@@ -372,7 +389,7 @@
                                 <button class="bg-red-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-800 transition-colors w-full" onclick="addToCart('Jabón de Rosa Mosqueta', 200)">Agregar al Carrito</button>
                             </div>
                         </div>
-                        <span class="page-number">9</span>
+                        <span class="page-number">11</span>
                     </div>
                     <div class="face back p-8 md:p-12 flex flex-col justify-center items-center text-center">
                         <h2 class="font-playfair text-4xl mb-6">Contacto y Redes</h2>
@@ -382,7 +399,7 @@
                             <a href="#" class="hover:text-green-700 transition-colors">Instagram</a>
                             <a href="#" class="hover:text-green-700 transition-colors">Facebook</a>
                         </div>
-                        <span class="page-number">10</span>
+                        <span class="page-number">12</span>
                     </div>
                 </div>
             </div>
@@ -430,17 +447,17 @@
             const totalPages = pages.length;
 
             function updateBookState() {
+                // Posiciona el libro cerrado a la derecha para que al abrir no se mueva
                 if (currentTurn === 0) {
-                    // ESTADO: LIBRO CERRADO
                     book.classList.add('is-closed');
                 } else {
-                    // ESTADO: LIBRO ABIERTO
                     book.classList.remove('is-closed');
                 }
 
                 // Gira las páginas que correspondan
                 pages.forEach((page, index) => {
-                    if (index < currentTurn) {
+                    const pageTurn = index + 1;
+                    if (pageTurn <= currentTurn) {
                         page.classList.add('flipped');
                         page.style.zIndex = index + 1;
                     } else {
@@ -461,9 +478,11 @@
                 nextBtn.disabled = currentTurn >= totalPages;
             }
 
-            window.goToTurn = (turnNumber) => {
-                if (turnNumber >= 0 && turnNumber <= totalPages) {
-                    currentTurn = turnNumber;
+            window.navigateToTurn = (targetTurn) => {
+                // El número del argumento corresponde al número de la página de producto
+                // El giro 1 es la portada, el 2 es la primera página de productos, etc.
+                if (targetTurn >= 0 && targetTurn <= totalPages) {
+                    currentTurn = targetTurn;
                     updateBookState();
                 }
             }
